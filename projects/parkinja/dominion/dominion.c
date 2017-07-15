@@ -674,7 +674,7 @@ int Adventurer_Efct(struct gameState *state) {
   //Original Code------------------------
   while(drawntreasure<2){
     if (state->deckCount[currentPlayer] <1) { //if the deck is empty we need to shuffle discard and add to deck            
-      shuffle(currentPlayer, state); //BUG: Was currentPlayer instead of MAX_HAND
+      shuffle(currentPlayer, state);
     }
     drawCard(currentPlayer, state);
     cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
