@@ -1,1 +1,1 @@
-Jared Parkinson - This is my assignment-2 submission!
+Jared Parkinson - This is my quiz-2 submission!
