@@ -16,76 +16,41 @@
 /* hand# means index of a card in current active player's hand */
 
 enum CARD
-{curse = 0,
-<<<<<<< HEAD
- estate,//1
- duchy,//2
- province,//3
+  {curse = 0,
+   estate,
+   duchy,
+   province,
 
- copper,//4
- silver,//5
- gold,//6
+   copper,
+   silver,
+   gold,
 
- adventurer,//7
+   adventurer,
    /* If no/only 1 treasure found, stop when full deck seen */
- council_room,//8
-   feast,//9 /* choice1 is supply # of card gained) */
- gardens,//10
-   mine, /*11 choice1 is hand# of money to trash, choice2 is supply# of money to put in hand */
-   remodel, /*12 choice1 is hand# of card to remodel, choice2 is supply# */
- smithy,//13
- village,//14
-
-   baron, //15/* choice1: boolean for discard of estate */
-   /* Discard is always of first (lowest index) estate */
- great_hall,//16
-   minion, //17/* choice1:  1 = +2 coin, 2 = redraw */
-   steward, //18/* choice1: 1 = +2 card, 2 = +2 coin, 3 = trash 2 (choice2,3) */
- tribute,//19
-
-   ambassador,//20 /* choice1 = hand#, choice2 = number to return to supply */
- cutpurse,//21
-   embargo, //22/* choice1 = supply# */
- outpost,//23
-   salvager, //24/* choice1 = hand# to trash */
- sea_hag,//25
- treasure_map//26
-=======
- estate,
- duchy,
- province,
-
- copper,
- silver,
- gold,
-
- adventurer,
-   /* If no/only 1 treasure found, stop when full deck seen */
- council_room,
+   council_room,
    feast, /* choice1 is supply # of card gained) */
- gardens,
+   gardens,
    mine, /* choice1 is hand# of money to trash, choice2 is supply# of
 	    money to put in hand */
    remodel, /* choice1 is hand# of card to remodel, choice2 is supply# */
- smithy,
- village,
+   smithy,
+   village,
 
    baron, /* choice1: boolean for discard of estate */
    /* Discard is always of first (lowest index) estate */
- great_hall,
+   great_hall,
    minion, /* choice1:  1 = +2 coin, 2 = redraw */
    steward, /* choice1: 1 = +2 card, 2 = +2 coin, 3 = trash 2 (choice2,3) */
- tribute,
+   tribute,
 
    ambassador, /* choice1 = hand#, choice2 = number to return to supply */
- cutpurse,
+   cutpurse,
    embargo, /* choice1 = supply# */
- outpost,
+   outpost,
    salvager, /* choice1 = hand# to trash */
- sea_hag,
- treasure_map
->>>>>>> parkinja-assignment-2
-};
+   sea_hag,
+   treasure_map
+  };
 
 struct gameState {
   int numPlayers; //number of players
@@ -114,10 +79,10 @@ struct gameState {
 struct gameState* newGame();
 
 int* kingdomCards(int k1, int k2, int k3, int k4, int k5, int k6, int k7,
-  int k8, int k9, int k10);
+		  int k8, int k9, int k10);
 
 int initializeGame(int numPlayers, int kingdomCards[10], int randomSeed,
- struct gameState *state);
+		   struct gameState *state);
 /* Responsible for initializing all supplies, and shuffling deck and
    drawing starting hands for all players.  Check that 10 cards selected
    are in fact (different) kingdom cards, and that numPlayers is valid. 
@@ -129,7 +94,7 @@ int shuffle(int player, struct gameState *state);
  empty */
 
 int playCard(int handPos, int choice1, int choice2, int choice3,
-  struct gameState *state);
+	     struct gameState *state);
 /* Play card with index handPos from current player's hand */
 
 int buyCard(int supplyPos, struct gameState *state);
