@@ -205,25 +205,30 @@ int shuffle(int player, struct gameState *state) {
   int card;
   int i;
 
-  if (state->deckCount[player] < 1)
+  if (state->deckCount[player] < 1) {
+    //printf("Shuffle 1\n"); //DEBUG
     return -1;
+  }
+  //printf("Shuffle 2\n"); //DEBUG
   qsort ((void*)(state->deck[player]), state->deckCount[player], sizeof(int), compare); 
   /* SORT CARDS IN DECK TO ENSURE DETERMINISM! */
-
+  //printf("Shuffle 3\n"); //DEBUG
   while (state->deckCount[player] > 0) {
     card = floor(Random() * state->deckCount[player]);
     newDeck[newDeckPos] = state->deck[player][card];
     newDeckPos++;
     for (i = card; i < state->deckCount[player]-1; i++) {
+      //printf("Shuffle 4\n"); //DEBUG
       state->deck[player][i] = state->deck[player][i+1];
     }
+    //printf("Shuffle 5\n"); //DEBUG
     state->deckCount[player]--;
   }
+  //printf("Shuffle 6\n"); //DEBUG
   for (i = 0; i < newDeckPos; i++) {
     state->deck[player][i] = newDeck[i];
     state->deckCount[player]++;
   }
-
   return 0;
 }
 
@@ -648,12 +653,13 @@ int getCost(int cardNumber)
 int Smithy_Efct(struct gameState *state, int handPos) {
   //Get the current player
   int currentPlayer = whoseTurn(state);
-  int i;
+  int i=0;
 
   //Original Code------------------------
   //+3 Cards
   //BUG: NO CARDS DRAWN ( i < 3 is the original)
-  for (i = 0; i < 0; i++) { //BUG: Was i < 3
+  //BUG: UPDATED 2 CARDS DRAWN ( i < 2)
+  for (i = 0; i < 2; i++) { //BUG: Was i<3, now i<2
     drawCard(currentPlayer, state);
   }
   //discard card from hand
@@ -661,34 +667,40 @@ int Smithy_Efct(struct gameState *state, int handPos) {
   return 0;
 }
 
-//Needs drawntreasure, state, currentPlayer,
-int Adventurer_Efct(struct gameState *state) {
+//Needs drawntreasure, state, *not needed can get*currentPlayer, cardDrawn, z, temphand[MAX_HAND], drawntreasure
+int Adventurer_Efct(struct gameState *state) {  
   //Needed vars
-  int drawntreasure = 0;    
+  //BUG: drawntreasure offset by 1
+  //Effect: You only draw 1 treasure now  
+  int drawntreasure = 1;
   int temphand[MAX_HAND];
-  int z = -1;
+  int z = 0; //this is the counter for the temp hand
   int cardDrawn = 0;
   //Get the current player
+  //printf("currentPlayer\n"); //DEBUG
   int currentPlayer = whoseTurn(state);
 
   //Original Code------------------------
   while(drawntreasure<2){
     if (state->deckCount[currentPlayer] <1) { //if the deck is empty we need to shuffle discard and add to deck            
+      //printf("Shuffle\n"); //DEBUG
       shuffle(currentPlayer, state);
     }
     drawCard(currentPlayer, state);
     cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
-    if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+    if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold) {
+      //printf("drawntreasure: %d\n", drawntreasure); //DEBUG
       drawntreasure++;
-    else{
-      //BUG: temphand accesses z with z being -1
-      //Effect: Breaks game, segmentation fault
+    }
+    else{      
+      //printf("Z: %d\n", z); //DEBUG
       temphand[z]=cardDrawn;
       state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
       z++;
     }
   }
   while(z-1>=0){
+    //printf("discard z\n"); //DEBUG
     state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
     z=z-1;
   }
@@ -796,24 +808,25 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
   switch( card ) {
     /*------------------------------*/
     case smithy:
-      Smithy_Efct(state, handPos);
+      return Smithy_Efct(state, handPos);
 
     /*------------------------------*/
     case adventurer:
       //Refactor
-      Adventurer_Efct(state);
+      //Needs drawntreasure, state, *not needed can get*currentPlayer, cardDrawn, z, temphand[MAX_HAND], drawntreasure
+      return Adventurer_Efct(state);
 
     /*------------------------------*/
     case mine:
-      Mine_Efct(state, choice1, choice2, handPos);      
+      return Mine_Efct(state, choice1, choice2, handPos);      
     
     /*------------------------------*/
     case village:
-      Village_Efct(state, handPos);
+      return Village_Efct(state, handPos);
 
     /*------------------------------*/
     case treasure_map:
-      Treasure_Efct(state, handPos);
+      return Treasure_Efct(state, handPos);
 
     /*------------------------------*/
     case council_room:
