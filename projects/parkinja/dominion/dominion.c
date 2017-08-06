@@ -659,7 +659,8 @@ int Smithy_Efct(struct gameState *state, int handPos) {
   //+3 Cards
   //BUG: NO CARDS DRAWN ( i < 3 is the original)
   //BUG: UPDATED 2 CARDS DRAWN ( i < 2)
-  for (i = 0; i < 2; i++) { //BUG: Was i<3, now i<2
+  //DEBUG: resolution was to update loop to 3
+  for (i = 0; i < 3; i++) { //BUG: Was i<3, now i<2
     drawCard(currentPlayer, state);
   }
   //discard card from hand
@@ -672,7 +673,8 @@ int Adventurer_Efct(struct gameState *state) {
   //Needed vars
   //BUG: drawntreasure offset by 1
   //Effect: You only draw 1 treasure now  
-  int drawntreasure = 1;
+  //Debug Fix Bug: Reverted drawntreasure to proper int
+  int drawntreasure = 0;
   int temphand[MAX_HAND];
   int z = 0; //this is the counter for the temp hand
   int cardDrawn = 0;
@@ -748,7 +750,8 @@ int Village_Efct(struct gameState *state, int handPos) {
   //BUG: +200 actions rather than +2
   //Effect: Allows player to take more actions
   //+2 Actions
-  state->numActions = state->numActions + 200;
+  //DEBUG: Resolution was to set actions to proper gamestate of +2.  
+  state->numActions = state->numActions + 2;
   //discard played card from hand
   discardCard(handPos, currentPlayer, state, 0);
   return 0;

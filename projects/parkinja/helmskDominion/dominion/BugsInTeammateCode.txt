@@ -1,0 +1,129 @@
+Jared Parkinson
+ONID:parkinja
+CS 362 Summer 2017
+
+Title: BugsInTeammateCode.txt - Assignment 5
+Date: 8/3/2017
+
+Preface: This document is a file containing bug reports for two bugs found in the dominion.c code of Kelsey Helms
+Based on template from here: http://noverse.com/blog/2012/06/how-to-write-a-good-bug-report/
+
+**********************
+**BUG 1: Smithy Card**
+**********************
+Title: Error 1 -  When playing the Smithy card, the cardEffect will discard the wrong card, or none at all
+Classification: Minor to Critical - Usually no knowledge of failure, potential seg fault. If you have a 
+ 	card in your hand at the hand position of handPos+1, the bug will be minor and it will discard the wrong card
+Platform: *nix Flip Servers (Specifically Flip 1)
+Reproducable: Every time
+Description:
+	Summary: 
+		The actual problem is that a card that is not the played Smithy is discarded. The next card in your hand is discarded, or none at all.		
+		When I was running tests using my cardtest1.c and my randomtestcard1.c Smithy test code I noticed that the handCount was failing.
+		I investigated the pre and post numbers visually, they seemed fine. However, when I reviewed the code in dominion.c, I noticed
+		that the discard function was incorrect. This was a "stumbled upon" bug find while looking at other concerning information.
+	What Happened:		
+		As I mentioned before, this was a stumble upon bug find during the lookup of the function to compare the handcount. The player
+		who is playing would have no idea that their card that has been discarded was the wrong card unless they checked their hand
+		immediately after a card play. In other words, nothing happened that would tip the user off that this bug had happened.
+		The results that happened were consistent errors in the tests for both cardtest1.c and randomtestcard1.c.
+	What's the error:
+		During the tests, the things that tipped me off were the errors with the handcount.
+		The randomtestcard1.c test failed with the following information
+			[FAILED]: Card Effect: HandCount Assert +3 drawn, -1 played
+			 -->aft Hand Count: 391
+			 -->aft DECK Count: 1
+			 -->aft Discard Count: 381
+			 -->aft Played Count: 1
+		The cardtest1.c test failed with the following information:
+			[---------- cardtest1.c (SMITHY)-----------]
+			Current hand count: 0
+			Current hand count: 1
+			Current hand count: 2
+			Current hand count: 3
+			Current hand count: 4
+			handCountBef: 5
+			Current hand count: 5
+			Current hand count: 6
+			Current hand count: 7
+			handCountAft: 7
+			-->Test 1 failed. Did not draw Cards accurately.
+			0 tests passed.
+	Steps to reproduce:
+		1. Compile and run the randomtestcard1.c and the cardtest1.c on the base clone code 
+		2. Run Make rTests to compile the output for the random tests
+		3. Review the randomtestcard1.out
+		4. Run Make myTests to compile and run the card/unit tests
+		5. Review the unittestresults.out
+		
+	Offending Code:
+		[dominion.c code starting at line 674-681]
+		//+3 Cards
+	    for (i = 0; i < 3; i++)
+	    {
+	        drawCard(currentPlayer, state);
+	    }
+	    
+	    //discard card from hand
+	    discardCard(handPos+1, currentPlayer, state, 0);
+
+	    Specifically, [ discardCard(handPos+1, currentPlayer, state, 0); ]
+	    *handPos should be handPos and not handPos+1.
+
+**************************
+**BUG 2: Adventurer Card**
+**************************
+Title: Error 2 -  When playing the Adventurer Card, the result the treasure count in hand is net +1(should net +2)
+Classification: Major - Player only has knowledge of error if reviewing hand cards. Major gameplay bug. 	
+Platform: *nix Flip Servers (Specifically Flip 1)
+Reproducable: Every time
+Description:
+	Summary: 
+		This bug will net you a +1 treasure to your hand instead of a +2 when the Adventurer card is played. This issue happens 100%
+		of the time.
+	What Happened:		
+		When I ran the randomtestadventurer test program, I noticed that the printout specifically said:
+			-->BeforeTreasureCount: 58
+			-->AfterTreasureCount: 59		
+		The Card Effect test failed. Knowing the rules of the game and the effect the adventurer card should produce, I noted the error.
+		**To see a screenshot, review Assignment-5.pdf attached.
+	What's the error:
+		During the tests, the things that tipped me off were the errors with the Before/After TreasureCount messages.
+		The randomtestadventurer test failed with the following information:
+			[FAILED]: Card Effect: HandCount Assert
+			 -->aft Hand Count: 495
+			 -->aft DECK Count: 426
+			 -->aft Discard Count: 37
+			 -->aft Played Count: 0
+			 -->aft Action Count: 1
+			 -->BeforeTreasureCount: 58
+			 -->AfterTreasureCount: 59
+			<----------CARD EFFECT----------->
+			///  Init Game Failed     : 0
+			///  Card Effect Failed   : 0
+			///  Hand Count Failed    : 1000
+			///  Treasure Cnt Failed  : 991
+			///  All Card Count Failed: 0			
+		The cardtest1.c test passed
+			[This code should be refactored]
+	Steps to reproduce:
+		1. Compile and run the randomtestadventurer test on the base clone code of Kelsey Helms
+		2. Run Make rTests to compile the output for the random tests
+		3. Review the randomtestadventurer.out
+		4. Note the difference between treasure after each test run of 1000 runs
+		5. Note the errors in the Treasure Cnt section in the summary
+		
+	Offending Code:
+		[dominion.c code starting at line 657-658]
+		    while(drawntreasure<2){
+		        if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
+		            shuffle(currentPlayer, state);
+		        }
+		        drawCard(currentPlayer, state);
+		        cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
+		        if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+		            drawntreasure = drawntreasure+2;    <--------------
+
+	    Specifically, [ drawntreasure = drawntreasure+2; ]
+	    *If drawntreasure adds 2 each time, the while statement will be met after 1 hit of that branch
+
